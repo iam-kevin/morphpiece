@@ -1,0 +1,44 @@
+version: 2.1
+orbs:
+  python: circleci/python@1.0.0
+jobs:
+  test:
+    working_directory: ~/python
+    docker:
+      - image: circleci/python:3.7.4
+        auth: 
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+        environment:
+          BASE_ITEM: keyboard
+    steps:
+      - checkout
+      - run: 
+          command: cd python
+          name: Navigate to the python folder
+      - run:
+          command: |
+            echo $BASE_ITEM
+            pip list
+            pytest
+            echo "Testing is complete"
+
+  build-and-test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: ./manage.py test
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - python/test:
+          args: '--dev'
+          pkg-manager: pipenv
+          test-tool: pytest
+      - test
