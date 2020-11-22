@@ -3,6 +3,9 @@ orbs:
   python: circleci/python@1.0.0
 jobs:
   test:
+    branches:
+      only:
+        - test
     working_directory: ~/python
     docker:
       - image: circleci/python:3.7.4
@@ -23,7 +26,10 @@ jobs:
             pytest
             echo "Testing is complete"
 
-  build-and-test:
+  build:
+    branches:
+      only:
+        - develop
     executor: python/default
     steps:
       - checkout
@@ -41,4 +47,4 @@ workflows:
           args: '--dev'
           pkg-manager: pipenv
           test-tool: pytest
-      - test
+      # - test
