@@ -52,4 +52,4 @@ workflows:
       #     args: '--dev'
       #     pkg-manager: pip
       #     test-tool: pytest
-      - build
+      - test

@@ -26,10 +26,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      # Navigates to the folder to begin working on it
       - name: Navigate to the right folder
         run: cd python
 
-      # Installs the needed dependencies
+      # Builds the version of the file needed
       - name: Python Semantic Release
         uses: relekang/python-semantic-release@master
         with:
