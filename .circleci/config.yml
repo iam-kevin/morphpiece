@@ -6,7 +6,7 @@ jobs:
     branches:
       only:
         - test
-    working_directory: ~/python
+    working_directory: ~/circle-ci-proj
     docker:
       - image: circleci/python:3.7.4
         auth: 
@@ -16,13 +16,15 @@ jobs:
           BASE_ITEM: keyboard
     steps:
       - checkout
+      - run:
+          command: |
+            pip install -U pytest
+          name: Installing the test dependencies
       - run: 
           command: cd python
           name: Navigate to the python folder
       - run:
           command: |
-            echo $BASE_ITEM
-            pip list
             pytest
             echo "Testing is complete"
 
@@ -33,6 +35,9 @@ jobs:
     executor: python/default
     steps:
       - checkout
+      - run:
+          command: cd python
+          name: Navigate to the python folder
       - python/load-cache
       - python/install-deps
       - python/save-cache
