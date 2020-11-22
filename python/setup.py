@@ -8,7 +8,7 @@ except ImportError:
     pass
 
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from morphpiece import __version__ as VERSION
 
 # Utility function for reading files
@@ -25,7 +25,7 @@ setup(
     license = "LGPL",
     keywords = "nlp morphpiece tokenizer semi supervised",
     url = "https://github.com/iam-kevin/morphpiece",
-    packages=['morphpiece', 'tests'],
+    packages=find_packages(exclude=("tests",)),
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
