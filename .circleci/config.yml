@@ -48,8 +48,8 @@ jobs:
 workflows:
   main:
     jobs:
-      - python/test:
-          args: '--dev'
-          pkg-manager: pip
-          test-tool: pytest
-      # - test
+      # - python/test:
+      #     args: '--dev'
+      #     pkg-manager: pip
+      #     test-tool: pytest
+      - build
