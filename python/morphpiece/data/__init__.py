@@ -1,7 +1,7 @@
-from .reference_vocabulary import LowercaseSwahiliReferenceVocabulary
+from .reference_vocabulary import LowercaseSwahiliReferenceVocabulary, _ReferenceVocabulary
 
 # adding Text Transformers
-from .corpus import DataTextTransformer, TokenTransformer
+from .corpus import DataTextTransformer, TokenTransformer, BasicTokenTransformer
 
 # adding readers
 from .corpus import LazyDataTextReader
