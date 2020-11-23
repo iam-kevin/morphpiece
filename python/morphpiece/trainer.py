@@ -16,7 +16,7 @@ from .config import MPConfig
 
 from .core import MorphPiece
 
-ACCEPTED_INIT_METHODS = ['orphans']
+ACCEPTED_INIT_METHODS = ['orphan']
 
 logger = logging.getLogger('morphpiece')
 logging.basicConfig(level=logging.INFO, 
