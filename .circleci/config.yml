@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   python: circleci/python@1.0.0
+  
 jobs:
   test:
     branches:
@@ -19,12 +20,14 @@ jobs:
       - run:
           command: |
             pip install -U pytest
+            pip install pylint
           name: Installing the test dependencies
       - run: 
           command: cd python
           name: Navigate to the python folder
       - run:
           command: |
+            pylint morphpiece
             pytest
             echo "Testing is complete"
 
@@ -52,4 +55,6 @@ workflows:
       #     args: '--dev'
       #     pkg-manager: pip
       #     test-tool: pytest
+
+      # simply adding this here
       - test
