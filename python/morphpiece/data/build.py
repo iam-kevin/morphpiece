@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, ConcatDataset
 
 from typing import Tuple, List, Iterable, Any, Union
 
-from ..tokenizer import MutableTokenizer
+from ..tokenizer import MutableTokenizer, Tokenizer
 from .corpus import DataTextTransformer, WordList, LazyDataTextReader
 from ..utils.data import generate_context_samples
 
