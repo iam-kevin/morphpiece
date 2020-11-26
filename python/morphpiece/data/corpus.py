@@ -55,12 +55,6 @@ class DataTextReader(object):
 
         if not (transformers is None or len(transformers) == 0):
             logger.info('Included transformers')
-            for ic, transfn in enumerate(transformers):
-                assert isinstance(transfn, DataTextTransformer), \
-                    "Object in the transformer must implement the {}, instead got {}".format(
-                        DataTextTransformer.__name__, type(transfn).__name__)
-
-                logger.info('[Tf .{:03d}] {}'.format(ic + 1, str(transfn)))
 
     def read(self, file_path: Union[str, os.PathLike]):
         logger.info('Reading the file \'{}\''.format(file_path))
