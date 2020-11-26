@@ -11,3 +11,5 @@ from .corpus import LazyDataTextReader
 
 # adding Dictionary-based components
 from .corpus import WordList
+
+from .build import MorphDataset, DataBuilder
