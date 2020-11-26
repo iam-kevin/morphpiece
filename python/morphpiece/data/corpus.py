@@ -34,6 +34,11 @@ class BasicTokenTransformer(TokenTransformer):
         
         return token
 
+
+class LowerTextTransformer(DataTextTransformer):
+    def transform(self, text: str):
+        return text.lower()
+
 class SimpleTextTransformer(DataTextTransformer):
     def transform(self, text: str):
         text = text.strip()
