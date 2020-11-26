@@ -20,12 +20,9 @@ class DataTextTransformer:
     def __call__(self, *args, **kwargs):
         return self.transform(*args, **kwargs)
 
-class TokenTransformer:
+class TokenTransformer(DataTextTransformer):
     def transform(self, token: str) -> Any:
         raise NotImplementedError()
-    
-    def __call__(self, *args, **kwargs):
-        return self.transform(*args, **kwargs)
     
 class BasicTokenTransformer(TokenTransformer):
     def __init__(self, lower=True):
@@ -35,7 +32,14 @@ class BasicTokenTransformer(TokenTransformer):
         if self._islower:
             return token.lower()
         
-        return token    
+        return token
+
+class SimpleTextTransformer(DataTextTransformer):
+    def transform(self, text: str):
+        text = text.strip()
+        texts = re.split(r'\s+', text)
+        return texts
+
 
 """
 Reader
