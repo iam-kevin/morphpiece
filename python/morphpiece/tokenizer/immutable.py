@@ -116,3 +116,6 @@ class SyllabicTokenizer(ImmutableTokenizer):
             data.append(tk)
             
         return data
+
+    def encode(self, word: str):
+        return [self[sbw] for sbw in self.tokenize(word)]
