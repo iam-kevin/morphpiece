@@ -14,6 +14,20 @@ from ..utils.data import generate_context_samples
 
 from itertools import chain
 
+from typing import Tuple, List, Iterable, Any, Union
+import os
+import re
+
+from pathlib import Path
+
+from morphpiece.data import DataTextTransformer, WordList, LazyDataTextReader
+from morphpiece.tokenizer import Tokenizer
+
+from itertools import chain
+
+import torch
+from torch.utils.data import Dataset, ConcatDataset, DataLoader
+from torch.nn.utils.rnn import pad_sequence
 
 class MorphDataset(Dataset):
     """Morphology Dataset"""
@@ -22,26 +36,36 @@ class MorphDataset(Dataset):
         self.tkr = tokenizer
     
     def __getitem__(self, ix: int):
-        inp, ctxs = self.ctx_data[ix]
+        key, out = self.ctx_data[ix]
+        context = list(chain.from_iterable(self.tkr.encode(w) for w in out['context']))
+        neg_samples = list(chain.from_iterable(self.tkr.encode(w) for w in out['neg_samples']))
         
-        inp_ix = torch.tensor(self.tkr.encode(inp))
-        ctxs_ix = list(map(lambda x: torch.tensor(self.tkr.encode(x)), ctxs))
+        context = list(set(context))
+        neg_samples = list(set(neg_samples))
+        
+        return torch.tensor(self.tkr.encode(key)), torch.tensor(context), torch.tensor(neg_samples)
+#         inp, ctxs = self.ctx_data[ix]
+        
+#         inp_ix = torch.tensor(self.tkr.encode(inp))
+#         ctxs_ix = list(map(lambda x: torch.tensor(self.tkr.encode(x)), ctxs))
 
-        return inp_ix, ctxs_ix
-    
+#         return inp_ix, ctxs_ix
+
     def __len__(self):
         return len(self.ctx_data)
 
+class SimpleTokenizer(DataTextTransformer):
+    def transform(self, text: str):
+        text = text.strip()
+        texts = re.split(r'\s+', text)
+        return texts
 
 class DataBuilder:
-    def __init__(self,
-                 sentence_transformer: DataTextTransformer,
-                 window_size: int = 5, 
-                 neg_samples = 10):
-        self.ws = window_size
-        self.ns = neg_samples
-        self.sentence_tokenize = sentence_transformer
-    
+    def __init__(self, sentence_tranformer: DataTextTransformer, tokenizer: MutableTokenizer, **options):
+        self.gener_options = options
+        self.sentence_tokenize = sentence_tranformer
+        self.tokenizer = tokenizer
+        
     def build_from_sentences(self, sentences: List[str], *args, **kwargs):
         pass
     
@@ -50,7 +74,7 @@ class DataBuilder:
         return self.build_from_tokens(tk, *args, **kwargs)
     
     def build_from_tokens(self, token_seq: List[Any], *args, **kwargs):
-        return list(generate_context_samples(token_seq, self.ws, *args, **kwargs))
+        return list(generate_context_samples(token_seq, *args, **self.gener_options, **kwargs))
     
     def build_from_file(self, file_path: Union[str, os.PathLike], *args, **kwargs):
         """Working with Path"""
@@ -64,13 +88,24 @@ class DataBuilder:
         reader = LazyDataTextReader(transformer=self.sentence_tokenize)
         for token_seq in (reader.read(file_path)):
             yield self.build_from_tokens(token_seq, *args, **kwargs)
-            
-            # TODO: if you plan on removing this, simply change the 
-            #  then change the `chain.from_iterable` to something else
-            # yield [SEP_TOKEN]
 
-    def build_dataset(self, file_path: str, tokenizer: MutableTokenizer, *args, **kwargs):
-        ctx_data = [MorphDataset(c, tokenizer=tokenizer) \
+    def build_dataset(self, file_path: str, *args, **kwargs):
+        ctx_data = [MorphDataset(c, tokenizer=self.tokenizer) \
                         for c in self._generate_contexted_words_from_file(file_path, *args, **kwargs)]
 
         return ConcatDataset(ctx_data)
+    
+    def _collate_fn(self, out):
+        # transpose
+        out = list(zip(*out))
+        
+        # pad and grow
+        return [pad_sequence(o, padding_value=self.tokenizer['pad']).T for o in out]
+    
+    def build_dataloader(self, file_path: str, **dataloader_opts):
+        dataset = self.build_dataset(file_path)
+
+        # convert to immutable to build 'pad' token
+        self.tokenizer = self.tokenizer.immutable()
+
+        return DataLoader(dataset, collate_fn=self._collate_fn, **dataloader_opts)
