@@ -9,7 +9,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 from typing import Tuple, List, Iterable, Any, Union
 
-from ..tokenizer import MutableTokenizer, Tokenizer
+from ..tokenizer import ImmutableTokenizer, Tokenizer
 from .corpus import DataTextTransformer, WordList, LazyDataTextReader
 from ..utils.data import generate_context_samples
 
@@ -41,7 +41,7 @@ class MorphDataset(Dataset):
         return len(self.ctx_data)
 
 class DataBuilder:
-    def __init__(self, sentence_tranformer: DataTextTransformer, tokenizer: MutableTokenizer, **options):
+    def __init__(self, sentence_tranformer: DataTextTransformer, tokenizer: ImmutableTokenizer, **options):
         self.gener_options = options
         self.sentence_tokenize = sentence_tranformer
         self.tokenizer = tokenizer
@@ -84,8 +84,4 @@ class DataBuilder:
     
     def build_dataloader(self, file_path: str, **dataloader_opts):
         dataset = self.build_dataset(file_path)
-
-        # convert to immutable to build 'pad' token
-        self.tokenizer = self.tokenizer.immutable()
-
         return DataLoader(dataset, collate_fn=self._collate_fn, **dataloader_opts)
