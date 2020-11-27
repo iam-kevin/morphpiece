@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 
 import torch
-from torch.utils.data import Dataset, ConcatDataset
+from torch.utils.data import Dataset, ConcatDataset, DataLoader
+from torch.nn.utils.rnn import pad_sequence
 
 from typing import Tuple, List, Iterable, Any, Union
 
@@ -13,21 +14,6 @@ from .corpus import DataTextTransformer, WordList, LazyDataTextReader
 from ..utils.data import generate_context_samples
 
 from itertools import chain
-
-from typing import Tuple, List, Iterable, Any, Union
-import os
-import re
-
-from pathlib import Path
-
-from morphpiece.data import DataTextTransformer, WordList, LazyDataTextReader
-from morphpiece.tokenizer import Tokenizer
-
-from itertools import chain
-
-import torch
-from torch.utils.data import Dataset, ConcatDataset, DataLoader
-from torch.nn.utils.rnn import pad_sequence
 
 class MorphDataset(Dataset):
     """Morphology Dataset"""
@@ -53,12 +39,6 @@ class MorphDataset(Dataset):
 
     def __len__(self):
         return len(self.ctx_data)
-
-class SimpleTokenizer(DataTextTransformer):
-    def transform(self, text: str):
-        text = text.strip()
-        texts = re.split(r'\s+', text)
-        return texts
 
 class DataBuilder:
     def __init__(self, sentence_tranformer: DataTextTransformer, tokenizer: MutableTokenizer, **options):
